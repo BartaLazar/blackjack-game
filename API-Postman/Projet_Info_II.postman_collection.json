@@ -1,0 +1,248 @@
+{
+	"info": {
+		"_postman_id": "ac12a028-8687-458f-bbe1-8993a5d7c971",
+		"name": "Projet Info II",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "18351408"
+	},
+	"item": [
+		{
+			"name": "Start",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/start",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Player",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/api/new_player?name=Lazar",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"new_player"
+					],
+					"query": [
+						{
+							"key": "name",
+							"value": "Lazar"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bet tokens",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/player/bet_tokens?number=2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"player",
+						"bet_tokens"
+					],
+					"query": [
+						{
+							"key": "number",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Player",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/player",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"player"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Croupier",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/croupier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"croupier"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get croupier score",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/croupier/score",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"croupier",
+						"score"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get party",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/party",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"party"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tirer carte",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/player/play/new_card",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"player",
+						"play",
+						"new_card"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Rester",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/player/play/stay",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"player",
+						"play",
+						"stay"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Abandonner",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/api/player/play/abandon",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"api",
+						"player",
+						"play",
+						"abandon"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

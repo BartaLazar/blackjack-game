@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Jeu de Blackjack</title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script>
+
+        var player_name = "";
+
+        var finished = false;
+
+        var etat = ""
+
+        var jetonsMises = 0;
+
+        /*
+         * Attendre ms milisecondes
+         * @param ms
+         * @returns {Promise<unknown>}
+         */
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        /**
+         * Montre les cartes du croupier
+         * @returns {Promise<void>}
+         */
+        async function showCroupierCards(){
+            let url = '/api/croupier/score';
+            let response = await fetch(url);
+            let data = await response.json();
+            const text = data;
+            console.log(text);
+            /**
+             * Contient le JSON renvoyé
+             * @type {any}
+             */
+            const croupierArr = text;
+
+            document.getElementById("id-middleup").innerHTML = "";
+
+            // création de table pour les cartes
+            for(i = 0; i < croupierArr["cardsNumber"]; i++){
+                var id_td = "c_card_" + i;
+                //Ajouter l'id aux cases
+                document.getElementById("id-middleup").innerHTML += "<td><div class='card-div' id=" + id_td +"></div></td>";
+
+            }
+
+            if (croupierArr["cardsNumber"]>0){
+
+                // remplir les images des cartes
+                for(i = 0; i < croupierArr["cardsNumber"]; i++) {
+                    //generer un id pour chaque td ex: c_card_0
+                    var id_td = "c_card_" + i;
+                    //Mettre les images de carte dans les cases
+                    var card_name
+                    if (i === 0) {
+                        console.log("courpierrrr" + croupierArr)
+                        card_name = "cards/" + croupierArr["firstCard"]["valeur"] + "_of_" + croupierArr["firstCard"]["couleur"] + ".png";
+                        console.log(card_name)
+                        document.getElementById(id_td).innerHTML = '<img src="' + card_name + '" class="card-image" alt="carte du croupier">'
+                    } else document.getElementById(id_td).innerHTML += '<img src="cards/card_back_black.png" class="card-image" alt="carte du croupier">'
+                }
+
+                document.getElementById("score-croupier").innerHTML = croupierArr["firstCard"]["valeur"];
+
+            }
+            else{
+                document.getElementById("score-croupier").innerHTML = croupierArr["score"];
+            }
+            if(croupierArr["cardsNumber"] <= 3){
+                document.getElementById("id-middleup").style.justifyContent = "center";
+            }
+            else{
+                document.getElementById("id-middleup").style.justifyContent = "";
+            }
+
+
+
+        }
+
+        /**
+         * Montre les cartes du joueur humain
+         * @returns {Promise<void>}
+         */
+        async function showPlayerCards(){
+            let url = '/api/player';
+            let response = await fetch(url);
+            let data = await response.json();
+            const text = data;
+            console.log(text);
+            /**
+             * Contient le JSON renvoyé
+             * @type {any}
+             */
+            const playerArr = text;
+
+            document.getElementById("id-middlebottom").innerHTML = "";
+
+            // création de table pour les cartes
+            for(i = 0; i < playerArr["cardsNumber"]; i++){
+                var id_td = "p_card_" + i;
+                //Ajouter l'id aux cases
+                document.getElementById("id-middlebottom").innerHTML += "<td><div class='card-div' id=" + id_td +"></div></td>";
+
+            }
+
+
+            if(playerArr["cardsNumber"] <= 3){
+                document.getElementById("id-middlebottom").style.justifyContent = "center";
+
+            }
+            else{
+                document.getElementById("id-middlebottom").style.justifyContent = "";
+            }
+
+
+            // remplir les images des cartes
+            for(i = 0; i < playerArr["cardsNumber"]; i++){
+                //generer un id pour chaque td ex: c_card_0
+                var id_td = "p_card_" + i;
+                //Mettre les images de carte dans les cases
+                var card_name
+                console.log("playerrrr"+playerArr)
+                card_name = "cards/" + playerArr["hand"][i]["valeur"] + "_of_" + playerArr["hand"][i]["couleur"]+ ".png";
+                console.log(card_name)
+                document.getElementById(id_td).innerHTML = '<img src="' + card_name + '" class="card-image" alt="carte du croupier">'
+
+            }
+        }
+
+        /**
+         * Montre la main du croupier
+         * @returns {Promise<void>}
+         */
+        async function showCrupierHand(){
+            let url = '/api/croupier';
+            let response = await fetch(url);
+            let data = await response.json();
+            const text = data;
+            console.log(text);
+            /**
+             * Contient le JSON renvoyé
+             * @type {any}
+             */
+            const croupierArr = text;
+
+
+            // remplir les images des cartes
+            for(i = 0; i < croupierArr["cardsNumber"]; i++){
+                //generer un id pour chaque td ex: c_card_0
+                var id_td = "c_card_" + i;
+                //Mettre les images de carte dans les cases
+                var card_name
+                console.log("playerrrr"+croupierArr)
+                card_name = "cards/" + croupierArr["hand"][i]["valeur"] + "_of_" + croupierArr["hand"][i]["couleur"]+ ".png";
+                console.log(card_name)
+                document.getElementById(id_td).innerHTML = '<img src="' + card_name + '" class="card-image" alt="carte du croupier">'
+
+            }
+
+            if(croupierArr["cardsNumber"] <= 3){
+                document.getElementById("id-middleup").style.justifyContent = "center";
+            }
+            else{
+                document.getElementById("id-middleup").style.justifyContent = "";
+            }
+
+        }
+
+        async function start(){
+
+            const response = await fetch("api/start", {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: `{}`,
+            });
+        }
+
+        //http://localhost:8080/api/player/bet_tokens?number=2
+        async function miser(){
+
+            await getGame();
+
+
+            if(etat === "en cours"){
+                alert("Vous ne pouvez pas miser pendant la partie!")
+                return;
+            }
+
+            // si fini, lancer une nouvelle partie
+            if(finished){
+                const response = await fetch("api/new_party", {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: `{}`,
+                });
+            }
+
+            var player_info = await showPlayerInfo();
+
+            if(player_info["jetons"] <= 0){
+                alert("Vous n'avez plus de jetons!")
+                await showPlayerCards();
+                await showCroupierCards();
+                await showCroupierInfo();
+                return;
+            }
+
+            const nbjetons = prompt("Entrez le nombre de jetons que vous vouler miser: ")
+
+            if(nbjetons > player_info["jetons"]){
+                alert("Vous n'avez pas assez de jetons!");
+            }
+
+            const response = await fetch("api/player/bet_tokens?number=" + nbjetons, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: `{}`,
+            });
+            alert("Cliquez sur la carte centrale pour tirer une carte")
+            await showPlayerInfo();
+            await showPlayerCards();
+            await showCroupierCards();
+            await getGame();
+        }
+
+        async function showPlayerInfo(){
+            let url = '/api/player';
+            let response = await fetch(url);
+            let data = await response.json();
+            const text = data;
+            console.log(text);
+            /**
+             * Contient le JSON renvoyé
+             * @type {any}
+             */
+            const playerArr = text;
+
+            // afficher le score
+            document.getElementById("score-joueur").innerHTML = playerArr["score"];
+
+
+            // afficher les jetons restants
+            document.getElementById("jetons-joueur").innerHTML = playerArr["jetons"] + " restant";
+
+            player_name = playerArr["nom"];
+
+            console.log("show player infos");
+
+            return(playerArr);
+
+        }
+
+
+        async function showCroupierInfo(){
+            let url = '/api/croupier/score';
+            let response = await fetch(url);
+            let data = await response.json();
+            const text = data;
+            console.log(text);
+            /**
+             * Contient le JSON renvoyé
+             * @type {any}
+             */
+            const croupierArr = text;
+
+            // afficher le score
+            document.getElementById("score-croupier").innerHTML = croupierArr["score"];
+
+        }
+
+        async function createPlayer(){
+
+            const name = prompt("Donnez votre nom:")
+            alert("Pour commancer une partie, misez des jetons en cliquant sur le jeton rouge");
+
+            const response = await fetch("api/new_player?name=" + name, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: `{}`,
+            });
+            await showPlayerInfo();
+            await getGame();
+
+        }
+
+        async function rester(){
+
+            await getGame();
+
+            if(finished) {
+                const response = await fetch("/api/empty_hand", {
+                    method: 'PUT',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: `{}`,
+                });
+                //console.log(await showCroupierCards())
+                await showPlayerCards();
+                await showPlayerInfo();
+                await showCroupierCards();
+                return;
+            }
+            if(etat !== "en cours"){
+                return;
+            }
+
+            const response = await fetch("api/player/play/stay", {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: `{}`,
+            });
+
+            /**
+             * Contient le JSON renvoyé
+             * @type {any}
+             */
+            await showPlayerInfo();
+            await showCroupierCards();
+            var gameInfos = await getGame();
+            await getWinner(gameInfos);
+
+        }
+
+        async function tirer(){
+
+            if(finished || etat !== "en cours"){
+                alert("Vous ne pouvez pas tirer de carte!")
+                return;
+            }
+
+            const response = await fetch("api/player/play/new_card", {
+                method: 'PUT',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: `{}`,
+            });
+
+            /**
+             * Contient le JSON renvoyé
+             * @type {any}
+             */
+            showPlayerInfo();
+            await showCroupierCards();
+            await showPlayerCards();
+
+        }
+
+        async function abandonner(){
+
+            await getGame();
+
+            document.getElementById("bouton_dynamique").innerHTML = "Rester"
+
+            if (etat !== "en cours"){
+                return;
+            }
+
+            const response = await fetch("api/player/play/abandon",{
+                method: 'PUT',
+                headers: {
+                'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+                body: `{}`,
+            });
+            /**
+             * Contient le JSON renvoyé
+             * @type {any}
+             */
+            showPlayerInfo();
+            await showPlayerCards();
+            await showCroupierCards();
+
+            await getGame();
+            alert("Misez des jetons pour commencer le prochain tour.");
+            await rester();
+            document.getElementById("bouton_dynamique").innerHTML = "Rester"
+
+
+        }
+        //verifie l'etat du jeu
+        async function getGame(){
+            let url = '/api/current_party';
+            let response = await fetch(url);
+            let data = await response.json();
+            const text = data;
+            console.log(text);
+            /**
+             * Contient le JSON renvoyé
+             * @type {any}
+             */
+            const arr = text;
+
+            finished = arr["finished"];
+
+            etat = arr["etat"];
+
+            jetonsMises = arr["nombreDeJetonsMises"]
+
+            if(finished){
+                document.getElementById("bouton_dynamique").innerHTML = "Reinitialiser la table"
+            }
+            else{
+                document.getElementById("bouton_dynamique").innerHTML = "Rester"
+            }
+
+
+            return(arr);
+
+        }
+
+        async function getWinner(arrr) {
+            if (finished) {
+                await showCrupierHand();
+                await showCroupierInfo();
+                await sleep(100);
+                alert("Le gagnant est : " + arrr["gagnant"])
+                if (arrr["gagnant"] === player_name) {
+                    alert("Vous avez gagné!");
+                }
+                alert("Misez des jetons pour commencer le prochain tour.");
+            }
+        }
+
+        window.onload = async function (){
+            start();
+            await sleep(100);
+            createPlayer();
+            getGame();
+        }
+
+
+
+
+    </script>
+</head>
+<body>
+    <div class="screen">
+        <table>
+            <tr>
+                <td width="25%">
+                    <p class="scorecroupier" id="score-croupier">Score du croupier</p>
+                </td>
+                <td class="middleup" width="50%" id = "id-middleup">
+                    <!--
+                    <div class="card" id="croupier-cards">
+                    </div>
+                    -->
+                </td>
+                <td width="25%">
+                    <button class="abondonner" onclick ="abandonner()">Abandonner</button>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%"></td>
+                <td class="middle" width="50%">
+                    <button id="bouton_dynamique" class="rester" onclick = "rester()">Rester</button>
+                    <div class="middlecards">
+                        <img onclick="tirer()" src="cards/card_back_black.png" class="card-image" id="new-card-image" alt="tirer une nouvelle carte">
+                    </div>
+                </td>
+                <td width="25%">
+                    <img src="img.png" class="round-image" alt="Description of your image">
+
+                </td>
+            </tr>
+            <tr>
+                <td width="25%">
+                    <p class="jetonsupdate" id="jetons-joueur"> Jetons Restants </p>
+                    <img onclick= "miser()" src="img_1.png" class="round-image2" alt="Description of your image">
+
+                </td>
+
+                <td class="middlebottom" width="50%" id = "id-middlebottom">
+
+                </td>
+                <td width="25%">
+                    <p class="scorejoueur" id="score-joueur">
+                        Votre score
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </div>
+</body>
+</html>
